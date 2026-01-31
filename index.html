@@ -3,102 +3,171 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>ハネモノファミリースタジアム 逆算ツール</title>
+  <title>ファミスタ 逆算ツール</title>
   <style>
     body {
-      font-family: sans-serif;
-      max-width: 500px;
-      margin: 30px auto;
-      padding: 20px;
-      background: #f7f7f7;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans JP", sans-serif;
+      max-width: 520px;
+      margin: 24px auto;
+      padding: 18px;
+      background: #f6f7fb;
     }
     h1 {
       font-size: 20px;
       text-align: center;
+      margin: 0 0 14px;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e6e8ef;
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.05);
     }
     label {
       display: block;
-      margin-top: 15px;
-      font-weight: bold;
+      margin-top: 12px;
+      font-weight: 700;
+      font-size: 14px;
     }
     input {
       width: 100%;
-      padding: 10px;
+      padding: 12px;
       font-size: 16px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      margin-top: 6px;
+      border-radius: 12px;
+      border: 1px solid #d8dbe6;
+      background: #fff;
+      box-sizing: border-box;
     }
     button {
       width: 100%;
-      margin-top: 20px;
+      margin-top: 16px;
       padding: 12px;
       font-size: 16px;
+      font-weight: 700;
       border: none;
-      border-radius: 10px;
-      background: #007bff;
+      border-radius: 12px;
+      background: #2563eb;
       color: white;
       cursor: pointer;
     }
-    button:hover {
-      background: #0056b3;
+    button:active {
+      transform: scale(0.99);
     }
     .result {
-      margin-top: 20px;
-      padding: 15px;
-      background: white;
-      border-radius: 10px;
-      border: 1px solid #ccc;
+      margin-top: 14px;
+      padding: 14px;
+      background: #f9fafb;
+      border-radius: 12px;
+      border: 1px solid #e6e8ef;
       font-size: 18px;
+      text-align: center;
+      line-height: 1.4;
+    }
+    .sub {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #6b7280;
       text-align: center;
     }
     .error {
       margin-top: 10px;
-      color: red;
+      color: #dc2626;
+      font-weight: 700;
       text-align: center;
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+    .btn-secondary {
+      background: #111827;
     }
   </style>
 </head>
 <body>
-  <h1>ハネモノファミリースタジアム 逆算ツール</h1>
+  <h1>ファミスタ 逆算ツール</h1>
 
-  <label>回転数</label>
-  <input type="number" id="rotation" placeholder="例：1500" />
+  <div class="card">
+    <label>回転数</label>
+    <input type="number" id="rotation" inputmode="decimal" placeholder="例：1500" />
 
-  <label>SP決定</label>
-  <input type="number" id="sp" placeholder="例：30" />
+    <label>SP決定回数</label>
+    <input type="number" id="sp" inputmode="decimal" placeholder="例：30" />
 
-  <label>ノーマル到達率</label>
-  <input type="number" id="normal" placeholder="例：60" />
+    <label>守備抜け回数</label>
+    <input type="number" id="defense" inputmode="decimal" placeholder="例：60" />
 
-  <button onclick="calc()">計算する</button>
+    <button onclick="calc()">計算する</button>
 
-  <div class="result" id="result">結果：-</div>
-  <div class="error" id="error"></div>
+    <div class="row">
+      <button class="btn-secondary" onclick="resetAll()" type="button">リセット</button>
+      <button class="btn-secondary" onclick="copyResult()" type="button">結果をコピー</button>
+    </div>
+
+    <div class="result" id="result">逆算：-</div>
+    <div class="sub" id="detail">式：回転数 ÷ (SP決定回数 + 守備抜け回数/4)</div>
+    <div class="error" id="error"></div>
+  </div>
 
   <script>
+    function toNum(id) {
+      const v = document.getElementById(id).value;
+      return v === "" ? NaN : Number(v);
+    }
+
     function calc() {
-      const rotation = parseFloat(document.getElementById("rotation").value);
-      const sp = parseFloat(document.getElementById("sp").value);
-      const normal = parseFloat(document.getElementById("normal").value);
+      const rotation = toNum("rotation");
+      const sp = toNum("sp");
+      const defense = toNum("defense");
 
       const errorDiv = document.getElementById("error");
       errorDiv.textContent = "";
 
-      if (isNaN(rotation) || isNaN(sp) || isNaN(normal)) {
-        errorDiv.textContent = "全ての項目を入力してください。";
+      if (Number.isNaN(rotation) || Number.isNaN(sp) || Number.isNaN(defense)) {
+        errorDiv.textContent = "回転数 / SP決定回数 / 守備抜け回数 をすべて入力してください。";
         return;
       }
 
-      if (sp === 0) {
-        errorDiv.textContent = "SP決定は0以外を入力してください。";
+      const denom = sp + (defense / 4);
+
+      if (denom === 0) {
+        errorDiv.textContent = "（SP決定回数 + 守備抜け回数/4）が0になるため計算できません。";
         return;
       }
 
-      const result = (rotation / sp) + (normal / 4);
+      const val = rotation / denom;
 
-      document.getElementById("result").textContent =
-        "結果：" + result.toFixed(3);
+      document.getElementById("result").textContent = "逆算：" + val.toFixed(3);
+
+      document.getElementById("detail").textContent =
+        "分母 = " + sp.toFixed(3) + " + " + (defense/4).toFixed(3) + " = " + denom.toFixed(3);
+    }
+
+    function resetAll() {
+      document.getElementById("rotation").value = "";
+      document.getElementById("sp").value = "";
+      document.getElementById("defense").value = "";
+      document.getElementById("result").textContent = "逆算：-";
+      document.getElementById("detail").textContent = "式：回転数 ÷ (SP決定回数 + 守備抜け回数/4)";
+      document.getElementById("error").textContent = "";
+    }
+
+    async function copyResult() {
+      const text = document.getElementById("result").textContent;
+      try {
+        await navigator.clipboard.writeText(text);
+        const d = document.getElementById("detail");
+        const old = d.textContent;
+        d.textContent = "コピーしました！（" + text + "）";
+        setTimeout(() => d.textContent = old, 1200);
+      } catch (e) {
+        document.getElementById("error").textContent =
+          "コピーできませんでした。iPhoneの場合は結果を長押ししてコピーしてください。";
+      }
     }
   </script>
 </body>
