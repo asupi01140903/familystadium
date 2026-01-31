@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ハネモノファミリースタジアム 逆算ツール</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      max-width: 500px;
+      margin: 30px auto;
+      padding: 20px;
+      background: #f7f7f7;
+    }
+    h1 {
+      font-size: 20px;
+      text-align: center;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+    input {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      font-size: 16px;
+      border: none;
+      border-radius: 10px;
+      background: #007bff;
+      color: white;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: white;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 18px;
+      text-align: center;
+    }
+    .error {
+      margin-top: 10px;
+      color: red;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <h1>ハネモノファミリースタジアム 逆算ツール</h1>
+
+  <label>回転数</label>
+  <input type="number" id="rotation" placeholder="例：1500" />
+
+  <label>SP決定</label>
+  <input type="number" id="sp" placeholder="例：30" />
+
+  <label>ノーマル到達率</label>
+  <input type="number" id="normal" placeholder="例：60" />
+
+  <button onclick="calc()">計算する</button>
+
+  <div class="result" id="result">結果：-</div>
+  <div class="error" id="error"></div>
+
+  <script>
+    function calc() {
+      const rotation = parseFloat(document.getElementById("rotation").value);
+      const sp = parseFloat(document.getElementById("sp").value);
+      const normal = parseFloat(document.getElementById("normal").value);
+
+      const errorDiv = document.getElementById("error");
+      errorDiv.textContent = "";
+
+      if (isNaN(rotation) || isNaN(sp) || isNaN(normal)) {
+        errorDiv.textContent = "全ての項目を入力してください。";
+        return;
+      }
+
+      if (sp === 0) {
+        errorDiv.textContent = "SP決定は0以外を入力してください。";
+        return;
+      }
+
+      const result = (rotation / sp) + (normal / 4);
+
+      document.getElementById("result").textContent =
+        "結果：" + result.toFixed(3);
+    }
+  </script>
+</body>
+</html>
